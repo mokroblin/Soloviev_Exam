@@ -5,16 +5,25 @@ using System.Text;
 
 class Program
 {
-    // Метод для ввода целого числа с проверкой на корректность
+    // Метод для ввода целого числа с обработкой исключений на некорректный ввод
     static int ReadInt(string message)
     {
         while (true)
         {
-            Console.Write(message);
-            string input = Console.ReadLine();
-            if (int.TryParse(input, out int result) && result > 0) 
-                return result;
-            Console.WriteLine("Ошибка: Введите корректное число больше нуля.");
+            try
+            {
+                Console.Write(message);
+                string input = Console.ReadLine();
+
+                if (int.TryParse(input, out int result) && result > 0)
+                    return result;
+                else
+                    throw new FormatException("Ошибка: Введите корректное число больше нуля.");
+            }
+            catch (FormatException ex)
+            {
+                Console.WriteLine(ex.Message);
+            }
         }
     }
 
@@ -63,12 +72,14 @@ class Program
         Console.WriteLine($"Данные успешно сохранены в файл: {absoluteFilePath}");
     }
 
-    // Метод для сохранения списка дисциплин в текстовый файл
+    // Метод для сохранения списка дисциплин в текстовый файл с сортировкой по номеру семестра
     static void SaveToTxt(PlanControl plan, string filePath)
     {
+        var sortedSubjects = plan.GetSubjects().OrderBy(s => s.Semester).ToList();
+
         using (StreamWriter sw = new(filePath, false, Encoding.UTF8))
         {
-            foreach (var subject in plan.GetSubjects())
+            foreach (var subject in sortedSubjects)
             {
                 sw.WriteLine($"Название: {subject.Name}, Преподаватель: {subject.Lecturer}, Семестр: {subject.Semester}");
             }
